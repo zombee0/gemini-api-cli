@@ -709,15 +709,20 @@ func attachInteractionInputs(root *cobra.Command) error {
 	agentRunCmd := findChild(agentGroup, "run")
 	// agent run keeps piped stdin as the request body: it is the full-control
 	// surface, so it takes media inputs but no --stdin/--file text.
+	hadGeneratedLong := agentRunCmd != nil && agentRunCmd.Long != ""
 	if err := attachIntentInputs(agentRunCmd, "input", "Prompt or task to send", intentInputs{media: true}); err != nil {
 		return fmt.Errorf("agent run: %w", err)
 	}
-	agentRunCmd.Long = strings.Replace(
-		agentRunCmd.Long,
-		"Run one interaction with a Gemini model (--model, the default) or a\nmanaged agent (--agent); the two flag sets are mutually exclusive.\nStreams text as it arrives; --stream=false returns one complete\ninteraction. --body takes the exact request JSON (\"model\"/\"agent\" picks the variant).",
-		"Run one interaction with a Gemini model (--model, default) or a managed agent (--agent).\nStreams text as it arrives (--stream=false or --background for one interaction unless --stream is passed); --body takes exact request JSON.",
-		1,
-	)
+	if hadGeneratedLong {
+		const (
+			generatedAgentRunLong = "Run one interaction with a Gemini model (--model, the default) or a\nmanaged agent (--agent); the two flag sets are mutually exclusive.\nStreams text as it arrives; --stream=false returns one complete\ninteraction. --body takes the exact request JSON (\"model\"/\"agent\" picks the variant).\n\nArguments:\n  <input>  Prompt or task to send\n\nRequest variants: Agent (--agent), Model (--model; default).\nVariant-specific flags cannot be combined."
+			compactAgentRunLong   = "Run one interaction with a Gemini model (--model, default) or a managed agent (--agent); streams text as it arrives (--stream=false or --background for one interaction unless --stream is passed; --body takes exact request JSON).\nArguments: <input>  Prompt or task to send\nRequest variants: Agent (--agent), Model (--model; default). Variant-specific flags cannot be combined."
+		)
+		if !strings.Contains(agentRunCmd.Long, generatedAgentRunLong) {
+			return fmt.Errorf("agent run: generated Long help text changed; update compactAgentRunLong in attachInteractionInputs")
+		}
+		agentRunCmd.Long = strings.Replace(agentRunCmd.Long, generatedAgentRunLong, compactAgentRunLong, 1)
+	}
 	return nil
 }
 
