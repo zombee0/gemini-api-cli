@@ -52,6 +52,7 @@ Provider                        | CLI                           | Guide
 **Vercel Sandbox**              | `sandbox` (`@vercel/sandbox`) | [`vercel/README.md`](./vercel/README.md)
 **Daytona**                     | `daytona`                     | [`daytona/README.md`](./daytona/README.md)
 **E2B**                         | `e2b` (`@e2b/cli`)            | [`e2b/README.md`](./e2b/README.md)
+**BoxLite**                     | `boxlite`                     | [`boxlite/README.md`](./boxlite/README.md)
 **Modal**                       | `modal`                       | [`modal/README.md`](./modal/README.md)
 **Fly.io (Sprites & Machines)** | `sprite` / `fly` (`flyctl`)   | [`fly-machines/README.md`](./fly-machines/README.md)
 **Google Cloud Run**            | `gcloud`                      | [`cloud-run/README.md`](./cloud-run/README.md)
