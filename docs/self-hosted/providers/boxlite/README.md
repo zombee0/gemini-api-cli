@@ -11,28 +11,28 @@ On your local machine, install the
 [`boxlite` CLI](https://github.com/boxlite-ai/boxlite/blob/main/docs/reference/cli/README.md#installation--verification),
 `curl`, and `jq`. The commands below use Bash.
 
-Obtain a [Gemini API key](https://ai.google.dev/gemini-api/docs/api-key) and a
-BoxLite API key with permission to create, execute commands in, and delete
-sandboxes:
+Log in to your BoxLite account in the browser and select the cloud context.
+Clear any previous environment overrides so later commands use this login:
 
 ```bash
-export GEMINI_API_KEY="your-gemini-api-key"
-export BOXLITE_API_KEY="your-boxlite-api-key"
-export BOXLITE_REST_URL="https://api.boxlite.ai"
+unset BOXLITE_API_KEY BOXLITE_REST_URL BOXLITE_REST_PATH_PREFIX \
+  BOXLITE_CONTEXT BOXLITE_PROFILE
+boxlite --context cloud auth login --url https://api.boxlite.ai --method browser
+boxlite context use cloud
 ```
 
-Discover the routing prefix for your BoxLite account:
+On SSH or a headless machine, replace `--method browser` with `--method device`
+and open the displayed verification URL in a browser on another device.
+Login saves the credentials, server URL, and account routing prefix; a BoxLite
+API key and manual routing-prefix configuration are not required.
 
-```bash
-export BOXLITE_REST_PATH_PREFIX
-BOXLITE_REST_PATH_PREFIX=$(curl -fsSL "$BOXLITE_REST_URL/v1/me" \
-  -H "Authorization: Bearer $BOXLITE_API_KEY" | jq -er '.path_prefix')
-```
-
-Create a `self_hosted` environment. Save its ID and scoped key; the API returns
+Obtain a [Gemini API key](https://ai.google.dev/gemini-api/docs/api-key) and
+create a `self_hosted` environment. Save its ID and scoped key; the API returns
 `environment_key` only once, at creation time:
 
 ```bash
+export GEMINI_API_KEY="your-gemini-api-key"
+
 ENVIRONMENT=$(curl -fsSL -X POST \
   "https://generativelanguage.googleapis.com/v1beta/environments" \
   -H "x-goog-api-key: $GEMINI_API_KEY" \
@@ -74,7 +74,8 @@ boxlite exec -d -u 1000:1000 -w /workspace \
 ```
 
 The worker makes outbound HTTPS connections to Google; no inbound port is
-needed. Keep `GEMINI_API_KEY` and `BOXLITE_API_KEY` on your local machine.
+needed. Keep `GEMINI_API_KEY` and your BoxLite login credentials on your local
+machine.
 Structured file tools are confined to `/workspace`; Bash commands execute
 inside the BoxLite sandbox.
 
