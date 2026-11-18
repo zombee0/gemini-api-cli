@@ -9,42 +9,36 @@ BoxLite REST API.
 On your local machine, install the
 [`gemini-api` CLI](https://github.com/google-gemini/gemini-api-cli), the
 [`boxlite` CLI](https://github.com/boxlite-ai/boxlite/blob/main/docs/reference/cli/README.md#installation--verification),
-`curl`, and `jq`. The commands below use Bash.
+and `curl`. The commands below use Bash.
 
 Log in to your BoxLite account in the browser and select the cloud context.
-Clear any previous environment overrides so later commands use this login:
 
 ```bash
-unset BOXLITE_API_KEY BOXLITE_REST_URL BOXLITE_REST_PATH_PREFIX \
-  BOXLITE_CONTEXT BOXLITE_PROFILE
 boxlite --context cloud auth login --url https://api.boxlite.ai --method browser
 boxlite context use cloud
 ```
 
-On SSH or a headless machine, replace `--method browser` with `--method device`
-and open the displayed verification URL in a browser on another device.
-Login saves the credentials, server URL, and account routing prefix; a BoxLite
-API key and manual routing-prefix configuration are not required.
-
 Obtain a [Gemini API key](https://ai.google.dev/gemini-api/docs/api-key) and
-create a `self_hosted` environment. Save its ID and scoped key; the API returns
-`environment_key` only once, at creation time:
+create a `self_hosted` environment. Export its ID and scoped key
+(`environment_key` is returned **only once at creation time**):
 
 ```bash
 export GEMINI_API_KEY="your-gemini-api-key"
 
-ENVIRONMENT=$(curl -fsSL -X POST \
+curl -fsSL -X POST \
   "https://generativelanguage.googleapis.com/v1beta/environments" \
   -H "x-goog-api-key: $GEMINI_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"mode":"self_hosted"}')
-export GEMINI_ENVIRONMENT_ID GEMINI_ENVIRONMENT_KEY
-GEMINI_ENVIRONMENT_ID=$(printf '%s' "$ENVIRONMENT" | jq -er '.id')
-GEMINI_ENVIRONMENT_KEY=$(printf '%s' "$ENVIRONMENT" | jq -er '.environment_key')
-unset ENVIRONMENT
+  -d '{"mode":"self_hosted"}'
+
+export GEMINI_ENVIRONMENT_ID="..."   # "id" from response (no "environments/" prefix)
+export GEMINI_ENVIRONMENT_KEY="..."  # "environment_key" from response
 ```
 
 ## Quick Start
+
+The slim image needs `curl` and CA certificates to download the CLI.
+Create `/workspace` owned by UID 1000 so the non-root worker can write files.
 
 ```bash
 # 1. Create a detached sandbox with a persistent main process.
